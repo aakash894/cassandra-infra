@@ -31,7 +31,7 @@ pipeline {
             steps {
                 sh'''
                 chmod +x file.sh
-                ./file.sh $VM_USER ~/$Key_pair_name
+                ./file.sh $VM_USER /home/$VM_USER/$Key_pair_name
                 '''
             }
         }
