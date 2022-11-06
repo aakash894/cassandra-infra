@@ -1,6 +1,8 @@
+def skipRemainingStages = false
 pipeline {
     agent any
     parameters {
+        choice choices: ['Apply', 'Destroy'], name: 'Infrastruture'
         choice choices: ['us-west-2a', 'us-west-2b', 'us-west-2c', 'us-west-2d'], description: 'Select the availability zone in which you want to create your subnet', name: 'AZ1'
         choice choices: ['us-west-2a', 'us-west-2b', 'us-west-2c', 'us-west-2d'], description: 'Select the availability zone for higher availibity of your resources', name: 'AZ2'
         string defaultValue: 'ami-017fecd1353bcc96e', description: 'Input amazon image id', name: 'AMI'
@@ -23,12 +25,31 @@ pipeline {
                 sh 'terraform init'
             }
         }
+        stage('terraform destroy'){
+            when {
+                expression { params.Infrastruture == 'Destroy' }
+            }
+            steps {
+                script {
+                    skipRemainingStages = true
+                    sh 'terraform destroy --auto-approve'
+                }
+            }    
+        }
         stage('terraform apply'){
+            when {
+                expression { params.Infrastruture == 'Apply' }
+            }
             steps {
                 sh 'terraform apply --auto-approve -var="AZ1=${AZ1}" -var="AZ2=${AZ2}" -var="ami=${AMI}" -var="instance_type=${instance_type}" -var="key_name=${key_name}" -var="node_count=${node_count}"'
             }
         }
         stage('terraform output'){
+            when {
+                expression {
+                    !skipRemainingStages
+                }
+            }
             steps {
                 sh'''
                 chmod +x file.sh
@@ -37,6 +58,11 @@ pipeline {
             }
         }
         stage('Copy data'){
+            when {
+                expression {
+                    !skipRemainingStages
+                }
+            }
             steps {
                 sh'''
                 IP=$(terraform output -json Bastion-publicIP | jq -r)
@@ -48,6 +74,11 @@ pipeline {
             }
         }
         stage('Configure ansible'){
+            when {
+                expression {
+                    !skipRemainingStages
+                }
+            }
             steps {
                 sh'''
                 IP=$(terraform output -json Bastion-publicIP | jq -r)
@@ -57,6 +88,11 @@ pipeline {
             }
         }
         stage('Git clone'){
+            when {
+                expression {
+                    !skipRemainingStages
+                }
+            }
             steps {
                 sh'''
                 IP=$(terraform output -json Bastion-publicIP | jq -r)
@@ -67,6 +103,11 @@ pipeline {
             }
         }
         stage('Cluster setup'){
+            when {
+                expression {
+                    !skipRemainingStages
+                }
+            }
             steps {
                 sh'''
                 IP=$(terraform output -json Bastion-publicIP | jq -r)
@@ -77,4 +118,3 @@ pipeline {
         }
     }    
 }
-
