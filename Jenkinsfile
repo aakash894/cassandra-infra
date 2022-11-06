@@ -7,8 +7,9 @@ pipeline {
         string defaultValue: 't2.medium', description: 'Input instance type', name: 'instance_type'
         string defaultValue: 'oregon', description: 'Input key pair name which you want to provide to your machine & ensure it will be pre-generated', name: 'key_name'
         string defaultValue: '3', description: 'Input node count for your database cluster', name: 'node_count'
+        string defaultValue: 'ubuntu', description: 'Specify the user of your ec2 instances [ubuntu for ubuntu and ec2-user for redhat]', name: 'ubuntu', trim: true
+        choice choices: ['apt', 'yum'], description: 'Select package manager i.e. in case of ubuntu -> apt and in redhat -> yum', name: 'Package_manager'
         string defaultValue: 'ubuntu', description: 'Specify the key pair name of your VM in .pem ext format [for e.g abc.pem]', name: 'VM_USER', trim: true
-        string defaultValue: 'oregon.pem', description: 'Specify the key pair name of your VM in .pem ext format [for e.g abc.pem]', name: 'Key_pair_name', trim: true
         choice choices: ['4.0.7', '3.11.14', '3.0.28'], description: 'Select your cassandra database version', name: 'version'
     }
     stages {
@@ -51,7 +52,7 @@ pipeline {
                 sh'''
                 IP=$(terraform output -json Bastion-publicIP | jq -r)
                 echo $IP
-                ssh -i "~/$Key_pair_name" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "sudo apt update -y && sudo apt-add-repository ppa:ansible/ansible -y && sudo apt install ansible -y"
+                ssh -i "~/$Key_pair_name" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "sudo $Package_manager update -y && sudo $Package_manager install git -y && sudo $Package_manager install ansible -y"
                 '''
             }
         }
