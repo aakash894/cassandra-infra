@@ -32,6 +32,7 @@ pipeline {
             steps {
                 script {
                     skipRemainingStages = true
+                    input('Do you really want to destroy Infrastructure?')
                     sh 'terraform destroy --auto-approve'
                 }
             }    
@@ -41,7 +42,10 @@ pipeline {
                 expression { params.Infrastruture == 'Apply' }
             }
             steps {
-                sh 'terraform apply --auto-approve -var="AZ1=${AZ1}" -var="AZ2=${AZ2}" -var="ami=${AMI}" -var="instance_type=${instance_type}" -var="key_name=${key_name}" -var="node_count=${node_count}"'
+                script{
+                    input('Do you want to create Infrastructure?')
+                    sh 'terraform apply --auto-approve -var="AZ1=${AZ1}" -var="AZ2=${AZ2}" -var="ami=${AMI}" -var="instance_type=${instance_type}" -var="key_name=${key_name}" -var="node_count=${node_count}"'
+                }
             }
         }
         stage('terraform output'){
