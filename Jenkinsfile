@@ -11,7 +11,6 @@ pipeline {
         string defaultValue: '3', description: 'Input node count for your database cluster', name: 'node_count'
         string defaultValue: 'ubuntu', description: 'Specify the user of your ec2 instances [ubuntu for ubuntu and ec2-user for redhat]', name: 'VM_USER', trim: true
         choice choices: ['apt', 'yum'], description: 'Select package manager i.e. in case of ubuntu -> apt and in redhat -> yum', name: 'Package_manager'
-        string defaultValue: 'oregon.pem', description: 'Specify the key pair name of your VM in .pem ext format [for e.g abc.pem]', name: 'Key_pair_name', trim: true
         choice choices: ['4.0.7', '3.11.14', '3.0.28'], description: 'Select your cassandra database version', name: 'version'
     }
     stages {
@@ -57,7 +56,7 @@ pipeline {
             steps {
                 sh'''
                 chmod +x file.sh
-                ./file.sh $VM_USER /home/$VM_USER/$Key_pair_name
+                ./file.sh $VM_USER /home/$VM_USER/${key_name}.pem
                 '''
             }
         }
@@ -71,9 +70,9 @@ pipeline {
                 sh'''
                 IP=$(terraform output -json Bastion-publicIP | jq -r)
                 echo $IP
-                ssh -i "~/$Key_pair_name" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "rm -rf Invnetory $Key_pair_name"
-                scp -i "~/$Key_pair_name" -o StrictHostKeyChecking=no -r Invnetory $VM_USER@$IP:~
-                scp -i "~/$Key_pair_name" -o StrictHostKeyChecking=no -r ~/$Key_pair_name $VM_USER@$IP:~
+                ssh -i "~/${key_name}.pem" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "rm -rf Invnetory ${key_name}.pem"
+                scp -i "~/${key_name}.pem" -o StrictHostKeyChecking=no -r Invnetory $VM_USER@$IP:~
+                scp -i "~/${key_name}.pem" -o StrictHostKeyChecking=no -r ~/${key_name}.pem $VM_USER@$IP:~
                 '''
             }
         }
@@ -87,7 +86,7 @@ pipeline {
                 sh'''
                 IP=$(terraform output -json Bastion-publicIP | jq -r)
                 echo $IP
-                ssh -i "~/$Key_pair_name" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "sudo $Package_manager update -y && sudo $Package_manager install git -y && sudo $Package_manager install ansible -y"
+                ssh -i "~/${key_name}.pem" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "sudo $Package_manager update -y && sudo $Package_manager install git -y && sudo $Package_manager install ansible -y"
                 '''
             }
         }
@@ -101,8 +100,8 @@ pipeline {
                 sh'''
                 IP=$(terraform output -json Bastion-publicIP | jq -r)
                 echo $IP
-                ssh -i "~/$Key_pair_name" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "rm -rf cassandra"
-                ssh -i "~/$Key_pair_name" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "git clone https://github.com/aakash894/cassandra.git"
+                ssh -i "~/${key_name}.pem" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "rm -rf cassandra"
+                ssh -i "~/${key_name}.pem" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "git clone https://github.com/aakash894/cassandra.git"
                 '''
             }
         }
@@ -116,7 +115,7 @@ pipeline {
                 sh'''
                 IP=$(terraform output -json Bastion-publicIP | jq -r)
                 echo $IP
-                ssh -i "~/$Key_pair_name" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "ansible-playbook -e version=${version} -i Invnetory ~/cassandra/Cassandra_review/test/cassandra.yml"
+                ssh -i "~/${key_name}.pem" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "ansible-playbook -e version=${version} -i Invnetory ~/cassandra/Cassandra_review/test/cassandra.yml"
                 '''
             }
         }
