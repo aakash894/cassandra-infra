@@ -29,7 +29,7 @@ resource "aws_security_group" "for_db_nodes" {
   description = "sg for db nodes"
   vpc_id      = var.vpc_id
   dynamic "ingress" {
-    for_each = [22, 80, 443, 7000, 7001, 7070, 7199, 9042, 9160, 9142]
+    for_each = [22, 80, 443, 7000, 7001, 7199, 9042, 9160, 9142]
     iterator = port
     content {
       description = "SG-nodes"
