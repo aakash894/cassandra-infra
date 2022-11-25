@@ -1,4 +1,5 @@
 def skipRemainingStages = false
+def current_stage = getCurrentStageName()
 pipeline {
     agent any
     parameters {
@@ -37,7 +38,7 @@ pipeline {
             }
             post {
                 success {
-                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for $current_stage is successful $BUILD_TAG'
                 }
             }    
         }
