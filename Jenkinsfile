@@ -34,6 +34,11 @@ pipeline {
                     input('Do you really want to destroy Infrastructure?')
                     sh 'terraform destroy --auto-approve'
                 }
+            }
+            post {
+                success {
+                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                }
             }    
         }
         stage('terraform apply'){
@@ -46,6 +51,11 @@ pipeline {
                     sh 'terraform apply --auto-approve -var="AZ1=${AZ1}" -var="AZ2=${AZ2}" -var="ami=${AMI}" -var="instance_type=${instance_type}" -var="key_name=${key_name}" -var="node_count=${node_count}"'
                 }
             }
+            post {
+                success {
+                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                }
+            } 
         }
         stage('terraform output'){
             when {
@@ -59,6 +69,11 @@ pipeline {
                 ./file.sh $VM_USER /home/$VM_USER/${key_name}.pem
                 '''
             }
+            post {
+                success {
+                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                }
+            }             
         }
         stage('Copy data'){
             when {
@@ -75,6 +90,11 @@ pipeline {
                 scp -i "~/${key_name}.pem" -o StrictHostKeyChecking=no -r ~/${key_name}.pem $VM_USER@$IP:~
                 '''
             }
+            post {
+                success {
+                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                }
+            }             
         }
         stage('Configure ansible'){
             when {
@@ -89,6 +109,11 @@ pipeline {
                 ssh -i "~/${key_name}.pem" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "sudo $Package_manager update -y && sudo $Package_manager install git -y && sudo $Package_manager install ansible -y"
                 '''
             }
+            post {
+                success {
+                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                }
+            } 
         }
         stage('Git clone'){
             when {
@@ -104,6 +129,11 @@ pipeline {
                 ssh -i "~/${key_name}.pem" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "git clone https://github.com/aakash894/cassandra.git"
                 '''
             }
+            post {
+                success {
+                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                }
+            } 
         }
         stage('Cluster setup'){
             when {
@@ -118,6 +148,11 @@ pipeline {
                 ssh -i "~/${key_name}.pem" -o StrictHostKeyChecking=no -tt $VM_USER@$IP "ansible-playbook -e version=${version} -i Invnetory ~/cassandra/Cassandra_review/test/cassandra.yml"
                 '''
             }
+            post {
+                success {
+                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                }
+            } 
         }
     }    
 }
