@@ -1,5 +1,4 @@
 def skipRemainingStages = false
-def current_stage = getCurrentStageName()
 pipeline {
     agent any
     parameters {
@@ -26,6 +25,7 @@ pipeline {
             }
         }
         stage('terraform destroy'){
+            def current_stage = getCurrentStageName()
             when {
                 expression { params.Infrastruture == 'Destroy' }
             }
