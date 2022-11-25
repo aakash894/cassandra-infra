@@ -25,7 +25,6 @@ pipeline {
             }
         }
         stage('terraform destroy'){
-            def current_stage = getCurrentStageName()
             when {
                 expression { params.Infrastruture == 'Destroy' }
             }
@@ -38,6 +37,7 @@ pipeline {
             }
             post {
                 success {
+                    def current_stage = getCurrentStageName()
                     slackSend channel: 'C043N02HGDP', message: 'Your bulid for $current_stage is successful $BUILD_TAG'
                 }
             }    
