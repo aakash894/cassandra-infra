@@ -24,7 +24,7 @@ pipeline {
                 sh 'terraform init'
             }
         }
-        stage('terraform destroy'){
+        stage('Destroy Infrastructure'){
             when {
                 expression { params.Infrastruture == 'Destroy' }
             }
@@ -37,12 +37,11 @@ pipeline {
             }
             post {
                 success {
-                    def current_stage = getCurrentStageName()
-                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for $current_stage is successful $BUILD_TAG'
+                    slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Infrastructure destruction is successful'
                 }
             }    
         }
-        stage('terraform apply'){
+        stage('Building Infrastructure'){
             when {
                 expression { params.Infrastruture == 'Apply' }
             }
@@ -54,11 +53,11 @@ pipeline {
             }
             post {
                 success {
-                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                    slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Building Infrastructure is successful'
                 }
             } 
         }
-        stage('terraform output'){
+        stage('Setting up Inventory'){
             when {
                 expression {
                     !skipRemainingStages
@@ -72,11 +71,11 @@ pipeline {
             }
             post {
                 success {
-                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                    slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Setting up Inventory is successful'
                 }
             }             
         }
-        stage('Copy data'){
+        stage('Data Transfer'){
             when {
                 expression {
                     !skipRemainingStages
@@ -93,7 +92,7 @@ pipeline {
             }
             post {
                 success {
-                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                    slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Transferring Data is successful'
                 }
             }             
         }
@@ -112,11 +111,11 @@ pipeline {
             }
             post {
                 success {
-                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                    slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for configure ansible is successful'
                 }
             } 
         }
-        stage('Git clone'){
+        stage('Cloning the ansible role'){
             when {
                 expression {
                     !skipRemainingStages
@@ -132,7 +131,7 @@ pipeline {
             }
             post {
                 success {
-                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                    slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Cloning ansible role is successful'
                 }
             } 
         }
@@ -151,7 +150,7 @@ pipeline {
             }
             post {
                 success {
-                    slackSend channel: 'C043N02HGDP', message: 'Your bulid for ${env.STAGE_NAME} is successful $BUILD_TAG'
+                    slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Setting up Cluster is successful'
                 }
             } 
         }
