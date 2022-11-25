@@ -14,14 +14,39 @@ pipeline {
         choice choices: ['4.0.7', '3.11.14', '3.0.28'], description: 'Select your cassandra database version', name: 'version'
     }
     stages {
-        stage('terraform format check') {
+        stage('Validating configrations') {
             steps{
-                sh 'terraform fmt'
+                sh'''
+                terraform fmt
+                terraform validate
+                '''
+            }
+            post {
+                success {
+                    slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Validating configrations is successful'
+                }
+                unstable { 
+                    slackSend channel: 'C043N02HGDP', color: 'warning', message: 'Your build for Validating configrations is unstable'
+                }
+                failure { 
+                    slackSend channel: 'C043N02HGDP', color: 'danger', message: 'Your build for Validating configrations is failed'
+                }
             }
         }
-        stage('terraform Init') {
+        stage('Initializing the terraform') {
             steps{
                 sh 'terraform init'
+            }
+            post {
+                success {
+                    slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for terraform initilializing is successful'
+                }
+                unstable { 
+                    slackSend channel: 'C043N02HGDP', color: 'warning', message: 'Your build for terraform initilializing is unstable'
+                }
+                failure { 
+                    slackSend channel: 'C043N02HGDP', color: 'danger', message: 'Your build for terraform initilializing is failed'
+                }
             }
         }
         stage('Destroy Infrastructure'){
@@ -39,6 +64,12 @@ pipeline {
                 success {
                     slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Infrastructure destruction is successful'
                 }
+                unstable { 
+                    slackSend channel: 'C043N02HGDP', color: 'warning', message: 'Your build for Infrastructure destruction is unstable'
+                }
+                failure { 
+                    slackSend channel: 'C043N02HGDP', color: 'danger', message: 'Your build for Infrastructure destruction is failed'
+                }
             }    
         }
         stage('Building Infrastructure'){
@@ -54,6 +85,12 @@ pipeline {
             post {
                 success {
                     slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Building Infrastructure is successful'
+                }
+                unstable { 
+                    slackSend channel: 'C043N02HGDP', color: 'warning', message: 'Your build for Building Infrastructure is unstable'
+                }
+                failure { 
+                    slackSend channel: 'C043N02HGDP', color: 'danger', message: 'Your build for Building Infrastructure is failed'
                 }
             } 
         }
@@ -72,6 +109,12 @@ pipeline {
             post {
                 success {
                     slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Setting up Inventory is successful'
+                }
+                unstable { 
+                    slackSend channel: 'C043N02HGDP', color: 'warning', message: 'Your build for Setting up Inventory is unstable'
+                }
+                failure { 
+                    slackSend channel: 'C043N02HGDP', color: 'danger', message: 'Your build for Setting up Inventory is failed'
                 }
             }             
         }
@@ -94,6 +137,12 @@ pipeline {
                 success {
                     slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Transferring Data is successful'
                 }
+                unstable { 
+                    slackSend channel: 'C043N02HGDP', color: 'warning', message: 'Your build for Transferring Data is unstable'
+                }
+                failure { 
+                    slackSend channel: 'C043N02HGDP', color: 'danger', message: 'Your build for Transferring Data is failed'
+                }
             }             
         }
         stage('Configure ansible'){
@@ -112,6 +161,12 @@ pipeline {
             post {
                 success {
                     slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for configure ansible is successful'
+                }
+                unstable { 
+                    slackSend channel: 'C043N02HGDP', color: 'warning', message: 'Your build for configure ansible is unstable'
+                }
+                failure { 
+                    slackSend channel: 'C043N02HGDP', color: 'danger', message: 'Your build for configure ansible is failed'
                 }
             } 
         }
@@ -133,6 +188,12 @@ pipeline {
                 success {
                     slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Cloning ansible role is successful'
                 }
+                unstable { 
+                    slackSend channel: 'C043N02HGDP', color: 'warning', message: 'Your build for Cloning ansible role is unstable'
+                }
+                failure { 
+                    slackSend channel: 'C043N02HGDP', color: 'danger', message: 'Your build for Cloning ansible role is failed'
+                }
             } 
         }
         stage('Cluster setup'){
@@ -151,6 +212,12 @@ pipeline {
             post {
                 success {
                     slackSend channel: 'C043N02HGDP', color: 'good', message: 'Your build for Setting up Cluster is successful'
+                }
+                unstable { 
+                    slackSend channel: 'C043N02HGDP', color: 'warning', message: 'Your build for Setting up Cluster is unstable'
+                }
+                failure { 
+                    slackSend channel: 'C043N02HGDP', color: 'danger', message: 'Your build for Setting up Cluster is failed'
                 }
             } 
         }
